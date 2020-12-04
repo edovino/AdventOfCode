@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
+#include <functional>
+
 
 namespace aoc {
     template<typename T>
@@ -27,6 +29,47 @@ namespace aoc {
     int _kbhit();
     bool isNumber(std::string s);
 
+    /**
+     * Checks if the value is within the range lower-higher, *excluding* the boundaries
+     * @tparam T type
+     * @tparam Compare comparator predicate to use
+     * @param val the value to check
+     * @param lo lower bound *exclusive*
+     * @param hi higher bound *exclusive*
+     * @param comp comparator predicate
+     * @return true if the value is between lo and hi (exclusive)
+     */
+
+    template<class T, class Compare>
+    bool between(T const& val, T const& lower, T const& higher, Compare comp) {
+        return comp(lower, val) && comp(val, higher);
+    }
+
+    template<class T>
+    bool between(T const& val, T const& lo, T const& hi) {
+        return between(val, lo, hi, std::less<T>());
+    }
+
+    /**
+     * Checks if the value is with the range lo-hi, *including* the boundaries
+     * @tparam T
+     * @tparam Compare
+     * @param val
+     * @param lo
+     * @param hi
+     * @param comp
+     * @return
+     */
+    template<class T, class Compare>
+    bool in_range(T const& val, T const& lo, T const& hi, Compare comp) {
+        return comp(lo - 1, val) && comp(val, hi + 1);
+    }
+
+    template<class T>
+    bool in_range(T const& val, T const& lo, T const& hi) {
+        return in_range(val, lo, hi, std::less<T>());
+    }
+
     class NamedAutoTimer {
         public:
             NamedAutoTimer(std::string name) : name{name} {
@@ -36,23 +79,31 @@ namespace aoc {
 
             ~NamedAutoTimer() {
                 auto timerEnd = std::chrono::steady_clock::now();
-                std::cout << "=== Finished " << name << ", took "
-                          << std::chrono::duration_cast<std::chrono::microseconds>(timerEnd - timerStart).count()
-                          << "us"
-                          << std::endl;
+                std::cout << "=== Finished " << name << ", took ";
+                printFormattedDuration(timerEnd);
+                std::cout << std::endl;
             }
 
             void lap() {
                 auto timerLap = std::chrono::steady_clock::now();
-                std::cout << "=== Lap for " << name << ": "
-                          << std::chrono::duration_cast<std::chrono::microseconds>(timerLap - timerStart).count()
-                          << "us"
-                          << std::endl;
+                std::cout << "=== Lap for " << name << ": ";
+                printFormattedDuration(timerLap);
+                std::cout << std::endl;
             }
 
         private:
             std::string name;
             std::chrono::steady_clock::time_point timerStart;
+
+            void printFormattedDuration(std::chrono::steady_clock::time_point timerEnd) {
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(timerEnd - timerStart).count();
+                if (duration > 1000) {
+                    duration = std::chrono::duration_cast<std::chrono::milliseconds>(timerEnd - timerStart).count();
+                    std::cout << duration << "ms";
+                } else {
+                    std::cout << duration << "us";
+                }
+            }
     };
 }
 
@@ -223,7 +274,7 @@ struct Node {
     }
 };
 
-namespace aocutils::io {
+namespace aoc::io {
     template<typename T>
     void loadCharwise(const std::string& filename, T pred) {
         std::fstream input;
@@ -281,7 +332,7 @@ namespace aocutils::io {
     }
 }
 
-namespace aocutils::dbg {
+namespace aoc::dbg {
     template<typename T>
     void dump(std::vector<T> v) {
         for (const auto& item : v) std::cout << item << std::endl;
