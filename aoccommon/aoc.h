@@ -16,6 +16,7 @@
 #include <numeric>
 #include <cmath>
 #include <functional>
+#include <cassert>
 
 
 namespace aoc {
