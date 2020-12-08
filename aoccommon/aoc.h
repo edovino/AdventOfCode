@@ -28,7 +28,7 @@ namespace aoc {
     void sleepMS(int ms);
     void waitForKeypress(int intervalMS = 100);
     int _kbhit();
-    bool isNumber(std::string s);
+    bool isNumber(const std::string& s);
 
     /**
      * Checks if the value is within the range lower-higher, *excluding* the boundaries
