@@ -15,26 +15,6 @@ struct Bag {
     bool operator<(const Bag& rhs) const { return type < rhs.type; }; // required by std::set
 };
 
-void findPossibleOuterBags(const std::map<std::string, Bag>& bagRules, std::set<Bag>& possibleOuterBags, const std::string& thisBag) {
-    std::set<Bag> set;
-    for (const auto&[type, bag] : bagRules) {
-        if (bag.inner.contains(thisBag)) {
-            set.insert(bag);
-            possibleOuterBags.insert(bag);
-        }
-    }
-
-//    possibleOutermostBags.insert(begin(set), end(set));
-    for (const auto& bag : set) findPossibleOuterBags(bagRules, possibleOuterBags, bag.type);
-}
-
-void countContainedBags(std::map<std::string, Bag>& rules, int& bags, const std::string& thisBagType) {
-    for (const auto&[bagType, count] : rules[thisBagType].inner) {
-        bags += count;
-        for (int i = 0; i < count; ++i) countContainedBags(rules, bags, bagType);
-    }
-}
-
 int main() {
     std::map<std::string, Bag> bagRules;
     {
@@ -61,8 +41,23 @@ int main() {
     {
         aoc::NamedAutoTimer t("part1");
 
+        // recursive lambda, cumbersome declaration
+        std::function<void(std::set<Bag>&, const std::string&)> findPossibleOuterBags;
+        findPossibleOuterBags = [&](std::set<Bag>& possibleOuterBags, const std::string& thisBag) -> void {
+            std::set<Bag> set;
+            for (const auto&[type, bag] : bagRules) {
+                if (bag.inner.contains(thisBag)) {
+                    set.insert(bag);
+                    possibleOuterBags.insert(bag);
+                }
+            }
+
+            for (const auto& bag : set) findPossibleOuterBags(possibleOuterBags, bag.type);
+        };
+
+
         std::set<Bag> possibleOuterMostBags;
-        findPossibleOuterBags(bagRules, possibleOuterMostBags, "shiny gold");
+        findPossibleOuterBags(possibleOuterMostBags, "shiny gold");
         std::cout << "Possible outermost bags: " << possibleOuterMostBags.size() << std::endl;
 
         assert(possibleOuterMostBags.size() == 213);
@@ -71,8 +66,17 @@ int main() {
     {
         aoc::NamedAutoTimer t("part2");
 
+        // recursive lambda, cumbersome declaration
+        std::function<void(int&, const std::string&)> countContainedBags;
+        countContainedBags = [&](int& bags, const std::string& thisBagType) -> void {
+            for (const auto&[bagType, count] : bagRules[thisBagType].inner) {
+                bags += count;
+                for (int i = 0; i < count; ++i) countContainedBags(bags, bagType);
+            }
+        };
+
         int totalContainedBags = 0;
-        countContainedBags(bagRules, totalContainedBags, "shiny gold");
+        countContainedBags(totalContainedBags, "shiny gold");
         std::cout << "Total contained bags: " << totalContainedBags << std::endl;
 
         assert(totalContainedBags == 38426);
