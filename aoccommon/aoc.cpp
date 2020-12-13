@@ -1,5 +1,9 @@
 #include "aoc.h"
 
+bool Vec_T_IO::vec_style_2D = false;
+char Vec_T_IO::vec_style_delim_open = '(';
+char Vec_T_IO::vec_style_delim_close = ')';
+
 namespace aoc {
     void sleepMS(int ms) {
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
@@ -69,6 +73,28 @@ namespace aoc::io {
         buffer << in.rdbuf();
         in.close();
         return buffer.str();
+    }
+
+    std::ostream& vecstyle_2d(std::ostream& os) {
+        Vec_T_IO::vec_style_2D = true;
+        return os;
+    }
+
+    std::ostream& vecstyle_3d(std::ostream& os) {
+        Vec_T_IO::vec_style_2D = false;
+        return os;
+    }
+
+    std::ostream& vecstyle_delim_angled(std::ostream& os) {
+        Vec_T_IO::vec_style_delim_open = '<';
+        Vec_T_IO::vec_style_delim_close = '>';
+        return os;
+    }
+
+    std::ostream& vecstyle_delim_round(std::ostream& os) {
+        Vec_T_IO::vec_style_delim_open = '(';
+        Vec_T_IO::vec_style_delim_close = ')';
+        return os;
     }
 }
 

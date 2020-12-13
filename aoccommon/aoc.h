@@ -108,6 +108,13 @@ namespace aoc {
     };
 }
 
+class Vec_T_IO {
+    public:
+        static bool vec_style_2D;
+        static char vec_style_delim_open;
+        static char vec_style_delim_close;
+};
+
 template<typename T>
 struct Vec_T {
     Vec_T(T x = 0, T y = 0, T z = 0) : x(x), y(y), z(z) {}
@@ -233,7 +240,10 @@ struct Vec_T {
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Vec_T& Vec) {
-        os << "<x=" << Vec.x << ", y=" << Vec.y << ", z=" << Vec.z << ">";
+        os << "(" << Vec.x << "," << Vec.y;
+        if (!Vec_T_IO::vec_style_2D) os << "," << Vec.z;
+        os << ")";
+
         return os;
     }
 };
@@ -319,18 +329,28 @@ namespace aoc::io {
     std::string loadIntoString(const std::string& filename);
 
     template<typename T>
+    std::vector<T> loadAsVector(std::istream& instream) {
+        std::vector<T> data;
+        T value;
+        while (instream >> value) data.emplace_back(value);
+
+        return data;
+    }
+
+    template<typename T>
     std::vector<T> loadAsVector(const std::string& file) {
         std::ifstream input;
         input.open(file);
-
-        std::vector<T> data;
-        T value;
-        while (input >> value) data.emplace_back(value);
-
+        auto data = loadAsVector<T>(input);
         input.close();
 
         return data;
     }
+
+    std::ostream& vecstyle_2d(std::ostream& os);
+    std::ostream& vecstyle_3d(std::ostream& os);
+    std::ostream& vecstyle_delim_angled(std::ostream& os);
+    std::ostream& vecstyle_delim_round(std::ostream& os);
 }
 
 namespace aoc::dbg {
