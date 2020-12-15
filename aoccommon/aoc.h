@@ -106,6 +106,25 @@ namespace aoc {
                 }
             }
     };
+
+/*
+    template <typename T>
+    std::vector<T> tokenizr(const std::string& str) {
+
+    }
+*/
+    //TODO: make into pipe-able range::view
+    //TODO: turn into template
+    std::vector<std::string> tokenizr(const std::string& str, char delim) {
+        std::vector<std::string> tokens;
+        std::string token;
+        std::istringstream iss(str);
+        while (iss) {
+            if (!std::getline(iss, token, delim)) break;
+            tokens.push_back(token);
+        }
+        return tokens;
+    };
 }
 
 class Vec_T_IO {
