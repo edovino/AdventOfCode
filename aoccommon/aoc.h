@@ -115,16 +115,74 @@ namespace aoc {
 */
     //TODO: make into pipe-able range::view
     //TODO: turn into template
-    std::vector<std::string> tokenizr(const std::string& str, char delim) {
-        std::vector<std::string> tokens;
+
+    template<typename T>
+    void __add(std::vector<T>& v, std::string token) {
+        v.push_back(token);
+    }
+
+    template<>
+    void __add(std::vector<int>& v, std::string token) {
+        v.push_back(std::stoi(token));
+    }
+
+    template<>
+    void __add(std::vector<double>& v, std::string token) {
+        v.push_back(std::stod(token));
+    }
+
+    template<>
+    void __add(std::vector<long double>& v, std::string token) {
+        v.push_back(std::stold(token));
+    }
+
+    template<>
+    void __add(std::vector<float>& v, std::string token) {
+        v.push_back(std::stof(token));
+    }
+
+    template<>
+    void __add(std::vector<long>& v, std::string token) {
+        v.push_back(std::stol(token));
+    }
+
+    template<>
+    void __add(std::vector<unsigned long>& v, std::string token) {
+        v.push_back(std::stoul(token));
+    }
+
+    template<>
+    void __add(std::vector<long long>& v, std::string token) {
+        v.push_back(std::stoll(token));
+    }
+
+    template<>
+    void __add(std::vector<unsigned long long>& v, std::string token) {
+        v.push_back(std::stoull(token));
+    }
+
+    template<typename T>
+    std::vector<T> tokenizr(const std::string& str, char delim) {
+        std::vector<T> tokens;
         std::string token;
         std::istringstream iss(str);
         while (iss) {
             if (!std::getline(iss, token, delim)) break;
-            tokens.push_back(token);
+            __add(tokens, token);
         }
         return tokens;
     };
+
+//    std::vector<int> tokenizrInts(const std::string& str, char delim) {
+//        std::vector<int> tokens;
+//        std::string token;
+//        std::istringstream iss(str);
+//        while (iss) {
+//            if (!std::getline(iss, token, delim)) break;
+//            tokens.push_back(std::stoi(token));
+//        }
+//        return tokens;
+//    };
 }
 
 class Vec_T_IO {
