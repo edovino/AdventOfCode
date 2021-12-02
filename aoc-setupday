@@ -1,0 +1,117 @@
+#!/bin/bash
+
+SESSION=$(cat ~/.aoc_session)
+
+DAY=$(date +'%-d')
+MONTH=$(date +'%m')
+if [ -z "$1" ] ; then
+	if [ "${MONTH}" == "12" ] && [ "${DAY}" -ge "1" ] && [ "${DAY}" -le "24" ] ; then
+		YEAR=$(date +'%Y')
+	else
+		echo use "$0" daynum [year]
+		exit 1
+	fi
+else
+	DAY=$1
+
+	if [ -z "$2" ] ; then
+		YEAR=$(date +'%Y')
+	else
+		YEAR=$2
+	fi
+fi
+
+DAYNUM=$(printf "%02i" "$DAY")
+PROJECTPATH=~/code/AdventOfCode/cpp/${YEAR}/day${DAYNUM}/
+echo "$PROJECTPATH"
+
+[[ -d ${PROJECTPATH} ]] || mkdir -p "${PROJECTPATH}"
+
+if [ -f "$PROJECTPATH"/main.cpp ] ; then
+	echo Day "${DAY}" \("$YEAR"\) already has code!
+else
+
+(
+cat <<MAINCPP
+#include <aoc.h>
+
+// #INPUT_SRC_DIR is a #define set by CMake
+//#define INPUT INPUT_SRC_DIR"/input-test-part1-1.txt"
+//#define INPUT INPUT_SRC_DIR"/input-test-part1-2.txt"
+//#define INPUT INPUT_SRC_DIR"/input-test-part1-3.txt"
+//#define INPUT INPUT_SRC_DIR"/input-test-part2-1.txt"
+//#define INPUT INPUT_SRC_DIR"/input-test-part2-2.txt"
+//#define INPUT INPUT_SRC_DIR"/input-test-part2-3.txt"
+#define INPUT INPUT_SRC_DIR"/input.txt"
+
+void part1() {
+    aoc::NamedAutoTimer t("part1");
+
+    aoc::io::eachLine(INPUT, [](const std::string& s) {
+    });
+}
+
+void part2() {
+    aoc::NamedAutoTimer t("part2");
+
+    aoc::io::eachLine(INPUT, [](const std::string& s) {
+    });
+}
+
+int main() {
+    part1();
+    part2();
+
+    return 0;
+}
+
+MAINCPP
+) > "$PROJECTPATH"/main.cpp
+
+fi
+
+#cp main.cpp $PROJECTPATH
+
+if [ ! -f "$PROJECTPATH"/input.txt ] ; then
+	curl -b "session=${SESSION}" https://adventofcode.com/"${YEAR}"/day/"${DAY}"/input -o "$PROJECTPATH"/input.txt
+else
+	echo Day "${DAY}" \("$YEAR"\) already has input.txt!
+fi
+
+touch "$PROJECTPATH"/input.txt
+touch "$PROJECTPATH"/input-test-part{1,2}-{1,2,3}.txt
+
+if [ -f "$PROJECTPATH"/CMakeLists.txt ] ; then
+	echo Day "${DAY}" \("$YEAR"\) already has CMakeLists.txt!
+else
+(
+cat <<CMAKELISTS.TXT
+cmake_minimum_required(VERSION 3.15)
+
+#message("AOC Project file: \${CMAKE_CURRENT_LIST_FILE}")
+get_filename_component(AOC_PROJECT_DIR "\${CMAKE_CURRENT_LIST_FILE}" PATH) #from the current CMakeLists.txt fqn get the path
+get_filename_component(AOC_DAY "\${AOC_PROJECT_DIR}" NAME) # last bit is the day
+get_filename_component(AOC_YEAR_TMP "\${AOC_PROJECT_DIR}" PATH) # parent dir full path
+get_filename_component(AOC_YEAR "\${AOC_YEAR_TMP}" NAME) # parent dir name
+message("Configuring project \${AOC_YEAR}-\${AOC_DAY}")
+
+project(\${AOC_YEAR}-\${AOC_DAY})
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS "\${CMAKE_CXX_FLAGS} -pthread")
+
+add_compile_definitions(INPUT_SRC_DIR="\${PROJECT_SOURCE_DIR}")
+
+add_subdirectory("../../aoccommon" cmake-build-debug)
+
+add_executable(\${PROJECT_NAME}
+               main.cpp)
+
+target_link_libraries(\${PROJECT_NAME} PUBLIC aoc)
+
+CMAKELISTS.TXT
+) > "$PROJECTPATH"/CMakeLists.txt
+
+fi
+
+#clion "$PROJECTPATH"
